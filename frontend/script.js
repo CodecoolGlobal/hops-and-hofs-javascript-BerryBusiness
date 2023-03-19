@@ -11,6 +11,9 @@ const beerComponent = ({ brewery, name, type, score, abv }) => `
 		<h5>${abv}</h5>
 	</div>
 `;
+function filterStrongIPAs() {
+  return beers.filter((beer) => beer.abv >= 6);
+}
 const winnerComponent = (beer) => `
 <div id="winner">
 <h1>The best light Ale is</h1>
@@ -20,9 +23,14 @@ ${buttonComponent('closeWinner', 'Close')}
 `;
 const sortBeerComponent = [...beers];
 
-function sortedBeers(beersToSort) {
-  return beersToSort.sort((a, b) => b.score - a.score);
+let eventCounter = 0;
+
+function isSortedAndHow(beerArray) {
+  const sortedAsc = [...beerArray].sort((a, b) => a.score - b.score);
+  const sortedDesc = [...beerArray].sort((a, b) => b.score - a.score);
+  return eventCounter % 2 === 0 ? sortedAsc : sortedDesc;
 }
+
 function removeClass() {
   const beerClass = document.getElementsByClassName('beer');
   Array.from(beerClass).forEach((element) => element.remove());
@@ -51,11 +59,28 @@ const loadEvent = (_) => {
       loadBeersFromData(beers);
       event.target.remove();
       rootElement.insertAdjacentHTML('afterbegin', buttonComponent('sortByScore', 'Sort by Score'));
+      rootElement.insertAdjacentHTML('afterbegin', buttonComponent('filterStrongIPAs', 'Strong IPAs'));
       break;
     case 'sortByScore':
       removeClass();
-      sortedBeers(sortBeerComponent);
-      loadSortedBeersFromData(sortBeerComponent);
+      eventCounter++;
+      loadSortedBeersFromData(isSortedAndHow(sortBeerComponent));
+      break;
+    case 'filterStrongIPAs':
+      event.target.remove();
+      removeClass();
+      eventCounter > 0 ?
+        loadBeersFromData(isSortedAndHow(filterStrongIPAs())) :
+        loadBeersFromData(filterStrongIPAs());
+      rootElement.insertAdjacentHTML('afterbegin', buttonComponent('resetFilter', 'Reset filter  '));
+      break;
+    case 'resetFilter':
+      event.target.remove();
+      removeClass();
+      eventCounter > 0 ?
+        loadBeersFromData(isSortedAndHow(sortBeerComponent)) :
+        loadBeersFromData(beers);
+      rootElement.insertAdjacentHTML('afterbegin', buttonComponent('filterStrongIPAs', 'Strong IPAs'));
       break;
     }
   };
