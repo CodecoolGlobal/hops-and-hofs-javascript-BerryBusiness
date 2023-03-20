@@ -21,6 +21,7 @@ ${beerComponent(beer)}
 ${buttonComponent('closeWinner', 'Close')}
 </div>
 `;
+
 const sortBeerComponent = [...beers];
 
 let eventCounter = 0;
@@ -31,6 +32,10 @@ function isSortedAndHow(beerArray) {
   return eventCounter % 2 === 0 ? sortedAsc : sortedDesc;
 }
 
+function findWinner(){
+  return [...beers].filter((beer) => beer.abv <= 6 && beer.type.includes('Ale'))
+  .reduce((acc, curr) => acc.abv > curr.abv ? acc : curr);
+}
 function removeClass() {
   const beerClass = document.getElementsByClassName('beer');
   Array.from(beerClass).forEach((element) => element.remove());
@@ -60,6 +65,7 @@ const loadEvent = (_) => {
       event.target.remove();
       rootElement.insertAdjacentHTML('afterbegin', buttonComponent('sortByScore', 'Sort by Score'));
       rootElement.insertAdjacentHTML('afterbegin', buttonComponent('filterStrongIPAs', 'Strong IPAs'));
+      rootElement.insertAdjacentHTML('afterbegin', buttonComponent('bestLightAle', 'Best Light Ale'));
       break;
     case 'sortByScore':
       removeClass();
@@ -82,6 +88,16 @@ const loadEvent = (_) => {
         loadBeersFromData(beers);
       rootElement.insertAdjacentHTML('afterbegin', buttonComponent('filterStrongIPAs', 'Strong IPAs'));
       break;
+    case 'bestLightAle':
+      event.target.remove();
+      rootElement.insertAdjacentHTML('afterbegin', winnerComponent(findWinner()));
+      break;
+      case 'closeWinner':
+        event.target.remove();
+        const element = document.getElementById('winner');
+        element.remove();
+        rootElement.insertAdjacentHTML('afterbegin', buttonComponent('bestLightAle', 'Best Light Ale'));
+
     }
   };
   window.addEventListener('click', clickEvent);
